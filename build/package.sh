@@ -61,9 +61,12 @@ print(f"  ok: {m['name']} {m['version_number']}, {len(m['dependencies'])} depend
 PY
 
 echo "==> staging"
+# Flat, with the DLL at the zip root: this mirrors packages Thunderstore has accepted
+# (e.g. ComfyMods-ColorfulDamage), and mod managers place root files into
+# BepInEx/plugins/<package>/ anyway.
 rm -rf "$STAGE"
-mkdir -p "$STAGE/plugins/DamageSplash"
-cp "$DLL"                        "$STAGE/plugins/DamageSplash/"
+mkdir -p "$STAGE"
+cp "$DLL"                        "$STAGE/"
 cp "$ROOT/thunderstore/manifest.json" "$STAGE/"
 cp "$ROOT/thunderstore/README.md"     "$STAGE/"
 cp "$ROOT/thunderstore/icon.png"      "$STAGE/"
@@ -72,7 +75,9 @@ cp "$ROOT/LICENSE"                    "$STAGE/"
 
 OUT="$ROOT/dist/DamageSplash-$VERSION.zip"
 rm -f "$OUT"
-( cd "$STAGE" && zip -qr "$OUT" . )
+# -D omits directory entries; -X drops extra file attributes. Keeps the archive to
+# exactly the files Thunderstore expects to see and nothing else.
+( cd "$STAGE" && zip -qrXD "$OUT" . )
 
 echo "==> $OUT"
 unzip -l "$OUT"
