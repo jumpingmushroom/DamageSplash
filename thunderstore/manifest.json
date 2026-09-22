@@ -1,0 +1,9 @@
+{
+  "name": "DamageSplash",
+  "version_number": "0.1.0",
+  "website_url": "https://github.com/jumpingmushroom/DamageSplash",
+  "dependencies": [
+    "denikson-BepInExPack_Valheim-5.4.2350"
+  ],
+  "description": "Bigger, bolder, more festive floating damage numbers: outlined fonts, a pop, an arc. Presets and full config. Client-side."
+}

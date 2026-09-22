@@ -1,0 +1,22 @@
+# Changelog
+
+## 0.1.0
+
+- First build: replaces the vanilla damage-text renderer with a pooled one. Font, outline,
+  near/far size falloff, pop entrance, arc motion, per-type colours. Vanilla, Bold and Festive
+  presets. `splash demo` console command.
+- Boldness (face dilation) setting: an outline on its own eats a thin face and the numbers read
+  as black blobs, so the presets fatten the strokes first.
+- Presets use Valheim-AveriaSansLibre: both Norse faces draw the digit zero as a rune.
+- Entrance settles on an ease-out-back curve, with a fade-in and a random tilt per number.
+- `splash set`, `splash get` and `splash rain` for tuning the look live.
+- Damage-over-time ticks on one victim add into a single number that climbs instead of stacking,
+  and it follows the victim rather than staying where the first tick landed.
+- A red bloom at the edges of the screen when you take a heavy hit, drawn from a vignette
+  generated at runtime; nothing is shipped for it.
+- Visibility: show every number, only your own fights, or none at all.
+- Detects ColorfulDamage and ZenCombat, which claim the same method, and stands aside by default
+  rather than racing them silently.
+- Numbers now know the hit behind them: sneak attacks, hits on staggered creatures and killing
+  blows get their own colour and a tag, damage-over-time ticks are tinted by element, and every
+  number is sized by what share of the target's health it took. Vanilla preset keeps all of it off.
