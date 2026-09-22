@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.1
+
+- Packaging only, no change to the mod. The archive is flat, with the DLL at its root and no
+  directory entries, matching the layout of packages Thunderstore has accepted. Version 0.1.0
+  was consumed by a rejected submission and can never be reused.
+
 ## 0.1.0
 
 - First build: replaces the vanilla damage-text renderer with a pooled one. Font, outline,
