@@ -1,7 +1,7 @@
 {
   "name": "DamageSplash",
   "version_number": "0.1.1",
-  "author": "jumpingmushroom",
+  "author": "Jumpingmushroom",
   "website_url": "https://github.com/jumpingmushroom/DamageSplash",
   "description": "Bigger, bolder, more festive floating damage numbers: outlined fonts, a pop, an arc. Presets and full config. Client-side.",
   "dependencies": [

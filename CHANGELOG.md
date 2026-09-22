@@ -1,10 +1,11 @@
 # Changelog
 
-## 0.1.1
+## 0.1.1 (unreleased)
 
-- Packaging only, no change to the mod. The archive is flat, with the DLL at its root and no
-  directory entries, matching the layout of packages Thunderstore has accepted. Version 0.1.0
-  was consumed by a rejected submission and can never be reused.
+- Packaging only, no change to the mod: the archive is flat, with the DLL at its root and no
+  directory entries. 0.1.0 shipped with the DLL under `plugins/DamageSplash/` and Thunderstore
+  accepted it, so this is tidying rather than a fix, and it rides along with the next real
+  release.
 
 ## 0.1.0
 
