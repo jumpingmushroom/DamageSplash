@@ -22,7 +22,7 @@
 
 - `build/deploy.sh`, `logs.sh`, `shot.sh` and `crop.sh` are rig-specific and gitignored: they
   exist only on the dev box, not in a fresh clone.
-- `./build/deploy.sh` builds Release and copies the DLL to the r2modman **Mods** profile on the
+- `./build/deploy.sh` builds **Debug** (`CONFIG=Release` for the shipping build) and copies the DLL to the r2modman **Mods** profile on the
   gaming rig over SSH, replacing it atomically. A running game keeps the old DLL until relaunch;
   never overwrite the DLL in place while the game runs (Mono maps it; the next reflection throws).
 - The rig's login shell is fish: wrap anything non-trivial in `bash -c '...'`.
@@ -37,6 +37,9 @@
 - In-game: `splash demo` spawns one of every number type around the player; `splash burst <n>`
   stress-tests the pool; `splash dot` fakes burning ticks to watch them merge; `splash flash`
   fires the screen-edge flash; `splash conflicts` reports other damage-number mods.
+- The command file exists in **Debug builds only** (`#if DEBUG`). Thunderstore's moderators held
+  the listing for manual review because a client mod ran commands from a file; `package.sh`
+  refuses a DLL that still contains it. Keep any similar dev hook out of Release.
 - With `DevCommandFile` on, console commands written to `BepInEx/config/DamageSplash.cmd` are run
   and the file deleted. **Never write it while the old session is still running**: that session
   eats it before the relaunch and the commands are lost. Deploy first, wait for the game to be

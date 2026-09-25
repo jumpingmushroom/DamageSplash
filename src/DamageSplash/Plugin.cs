@@ -16,12 +16,14 @@ namespace DamageSplash
     {
         public const string PluginGuid = "com.jumpingmushroom.damagesplash";
         public const string PluginName = "DamageSplash";
-        public const string PluginVersion = "0.1.2";
+        public const string PluginVersion = "0.1.3";
 
         internal static ManualLogSource Log;
 
         private Harmony _harmony;
+#if DEBUG
         private float _nextCommandPoll;
+#endif
 
         private void Awake()
         {
@@ -53,18 +55,25 @@ namespace DamageSplash
             float now = Time.time;
             Demo.Update(now);
             EdgeFlash.Update(Time.deltaTime);
+#if DEBUG
             if (PluginConfig.DevCommandFile.Value && now >= _nextCommandPoll)
             {
                 _nextCommandPoll = now + 0.5f;
                 RunCommandFile();
             }
+#endif
         }
 
+#if DEBUG
         /// <summary>
         /// Development aid: console commands dropped into a file next to the config, so the look
         /// can be driven from a shell while the game runs. The file is left alone until a world
         /// is loaded, so a sequence queued before the game starts runs once there is a player to
         /// show it to rather than being eaten at the main menu.
+        ///
+        /// Debug builds only. Thunderstore's moderators hold any client mod that runs commands
+        /// from a file for manual review, and players have no use for it, so the Release DLL
+        /// does not contain it at all (package.sh checks).
         /// </summary>
         private static void RunCommandFile()
         {
@@ -100,6 +109,7 @@ namespace DamageSplash
                 console.TryRunCommand(line, silentFail: false, skipAllowedCheck: false);
             }
         }
+#endif
 
         /// <summary>Any setting changed: rebuild cached materials and hand them to the numbers
         /// already in flight, and push the distance cap into the live DamageText.</summary>

@@ -30,7 +30,9 @@ namespace DamageSplash
         public static ConfigEntry<bool> HideZeros;
         public static ConfigEntry<int> MaxAlive;
         public static ConfigEntry<bool> Verbose;
-        public static ConfigEntry<bool> DevCommandFile;
+#if DEBUG
+        public static ConfigEntry<bool> DevCommandFile;   // Debug builds only; see Plugin.RunCommandFile
+#endif
 
         // Font
         /// <summary>Both Valheim-Norse faces draw the digit zero as a rune; see Fonts.PreferredDisplay.</summary>
@@ -137,7 +139,9 @@ namespace DamageSplash
             HideZeros = cfg.Bind("1 General", "HideZeros", false, D("Do not show hits for 0 damage at all. Vanilla shows a grey 0.", o++));
             MaxAlive = cfg.Bind("1 General", "MaxAlive", 64, D("How many numbers can be on screen at once; the oldest is dropped beyond that. Vanilla has no cap (200 for zeros).", o++, new AcceptableValueRange<int>(8, 400)));
             Verbose = cfg.Bind("1 General", "Verbose", false, D("Extra lines in the BepInEx log.", o++, null, true));
+#if DEBUG
             DevCommandFile = cfg.Bind("1 General", "DevCommandFile", false, D("Development aid: run console commands written to BepInEx/config/DamageSplash.cmd, one per line, then delete the file.", o++, null, true));
+#endif
 
             // Bound without an acceptable-value list on purpose: with one, BepInEx clamps a saved
             // name that is not in it back to the default before the fonts are known. The list
@@ -280,7 +284,11 @@ namespace DamageSplash
 
         private static bool IsVisual(ConfigEntryBase e)
         {
-            return e != Enabled && e != Verbose && e != DevCommandFile && e != MaxDistance && e != HideZeros
+#if DEBUG
+            if (e == DevCommandFile)
+                return false;
+#endif
+            return e != Enabled && e != Verbose && e != MaxDistance && e != HideZeros
                 && e != MaxAlive && e != Visibility && e != YieldToOtherMods && e != DebugSimulateConflict;
         }
 

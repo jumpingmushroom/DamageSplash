@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.3
+
+- The development command file (`DevCommandFile`) is gone from release builds. It let a text
+  file in the config folder drive the console, which a client-side mod has no business shipping;
+  it now exists only in developer builds. An old `DevCommandFile` line left in your config file
+  is simply ignored.
+
 ## 0.1.2
 
 - **Mine** visibility now keeps your own hits on creatures another player's game is running.

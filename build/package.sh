@@ -34,6 +34,20 @@ if [ "$VERSION" != "$ASM_VERSION" ] || [ "$VERSION" != "$CSPROJ_VERSION" ]; then
     exit 1
 fi
 
+echo "==> checking the DLL carries no dev-only code"
+# The command file (Plugin.RunCommandFile) is compiled into Debug builds only. Thunderstore's
+# moderators hold a client mod that runs commands from a file for manual review, so a Release
+# DLL that still mentions it must never ship.
+python3 - "$DLL" <<'PY2'
+import sys
+data = open(sys.argv[1], "rb").read()
+for word in ("DamageSplash.cmd", "DevCommandFile"):
+    if word.encode("utf-16-le") in data or word.encode() in data:
+        print(f"  {sys.argv[1]} contains {word!r}: dev-only code in a release build", file=sys.stderr)
+        sys.exit(1)
+print("  ok: no command file")
+PY2
+
 echo "==> validating manifest"
 python3 - "$ROOT" <<'PY'
 import json, re, sys, os
