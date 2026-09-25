@@ -1,3 +1,4 @@
+using System;
 using DamageSplash.Core;
 using HarmonyLib;
 using UnityEngine;
@@ -33,23 +34,41 @@ namespace DamageSplash.Patches
             if (!PluginConfig.Enabled.Value || !SplashPool.Ready || Compat.ShouldYield)
                 return true;
 
-            if (text == "0" && (PluginConfig.HideZeros.Value || SplashPool.ActiveCount >= PluginConfig.MaxAlive.Value))
+            // On the client that owns the target this runs inside ApplyDamage, before the health
+            // is taken, with nothing catching in between: an exception escaping here would cancel
+            // the hit. If drawing fails, vanilla draws instead.
+            try
+            {
+                Show(type, pos, distance, text, mySelf);
                 return false;
+            }
+            catch (Exception ex)
+            {
+                Guard.Report("AddInworldText", ex);
+                return true;
+            }
+        }
+
+        private static void Show(DamageText.TextType type, Vector3 pos, float distance, string text, bool mySelf)
+        {
+            // "Too hard" arrives with a payload of "0" too, but it is a message, not a hit for
+            // nothing, so HideZeros leaves it alone. Vanilla's busy rule still applies to it.
+            if (text == "0" && ((PluginConfig.HideZeros.Value && type != DamageText.TextType.TooHard)
+                || SplashPool.ActiveCount >= PluginConfig.MaxAlive.Value))
+                return;
 
             if (!Allowed(type, mySelf, pos))
-                return false;
+                return;
 
             Style style = Styles.Resolve(type, text, mySelf, pos);
 
-            // Feed a number already floating over this victim rather than adding another.
+            // Feed a number already floating over this victim rather than adding another. The
+            // kill hook restyles whichever number this hit ended up in, merged or new, if the
+            // hit turns out to have been fatal.
             int mergeKey = Merger.KeyFor(style, type, mySelf);
-            if (Merger.TryMerge(style, type, mergeKey, pos))
-                return false;
-
-            Splash splash = SplashPool.Spawn(style, style.Text, pos, distance, type, mergeKey);
-            // The kill hook restyles this one if the hit turns out to have been fatal.
+            Splash splash = Merger.TryMerge(style, type, mergeKey, pos)
+                ?? SplashPool.Spawn(style, style.Text, pos, distance, type, mergeKey);
             HitContext.SetSpawned(pos, splash);
-            return false;
         }
 
         /// <summary>

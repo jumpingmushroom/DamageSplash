@@ -35,15 +35,16 @@ namespace DamageSplash.Core
             return style.Dot ? PluginConfig.DotMergeWindow.Value : PluginConfig.HitMergeWindow.Value;
         }
 
-        /// <summary>Feed this amount into a number already on screen, if there is a matching one.</summary>
-        public static bool TryMerge(Style style, DamageText.TextType type, int key, Vector3 worldPos)
+        /// <summary>Feed this amount into a number already on screen, if there is a matching
+        /// one, and return that number; null when there is none.</summary>
+        public static Splash TryMerge(Style style, DamageText.TextType type, int key, Vector3 worldPos)
         {
             if (key == 0)
-                return false;
+                return null;
 
             Splash s = SplashPool.FindMergeable(key, Time.time, WindowFor(style), PluginConfig.MergeMaxLife.Value);
             if (s == null)
-                return false;
+                return null;
 
             s.Value += style.Value;
             s.Number = Styles.NumberText(type, s.Value);
@@ -62,7 +63,7 @@ namespace DamageSplash.Core
             s.Timer = 0f;
             s.Color.a = 1f;
             s.Tr.localScale = Vector3.one * (s.Anim.PopDuration > 0f ? s.Anim.PopFrom : 1f);
-            return true;
+            return s;
         }
     }
 }

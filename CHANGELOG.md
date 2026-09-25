@@ -2,10 +2,20 @@
 
 ## 0.1.1 (unreleased)
 
-- Packaging only, no change to the mod: the archive is flat, with the DLL at its root and no
-  directory entries. 0.1.0 shipped with the DLL under `plugins/DamageSplash/` and Thunderstore
-  accepted it, so this is tidying rather than a fix, and it rides along with the next real
-  release.
+- A failure inside DamageSplash can no longer cancel a hit. The number is drawn inside the
+  game's damage call, before the health is taken, so an exception from the mod used to abort
+  the hit itself. Every hook now catches its own errors, logs them a few times, and lets the
+  game (and vanilla's number) carry on.
+- A context left behind by a failed hit can no longer tag a later number: contexts now only
+  pair within the frame they were made in.
+- A burning or poison tick that kills now gets the kill tag even when it merged into the
+  climbing number.
+- Only the killing blow is marked as one. A second hit landing before the game registers the
+  death (arrows, damage ticks) was also tagged KILL.
+- HideZeros no longer hides the "too hard" message on rocks and trees your tool cannot damage.
+- Packaging: the archive is flat, with the DLL at its root and no directory entries. 0.1.0
+  shipped with the DLL under `plugins/DamageSplash/` and Thunderstore accepted it, so this is
+  tidying rather than a fix.
 
 ## 0.1.0
 

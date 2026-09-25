@@ -14,6 +14,8 @@ namespace DamageSplash.Core
         public float Damage;         // the number that will be shown
         public float MaxHealth;      // 0 when unknown
         public int TargetId;         // identity for merging ticks on the same victim
+        public int Frame;            // stamped by Set; a context from another frame never pairs
+        public bool WasAlive;        // health above 0 before this hit, so only the killing blow is a kill
         public bool AttackerIsLocal;
         public bool TargetIsLocalPlayer;
         public bool Sneak;
@@ -44,9 +46,12 @@ namespace DamageSplash.Core
 
         public static Splash Spawned => _current.Spawned;
 
+        public static bool WasAlive => _current.WasAlive;
+
         public static void Set(HitInfo info)
         {
             info.Valid = true;
+            info.Frame = Time.frameCount;
             _current = info;
         }
 
@@ -75,8 +80,11 @@ namespace DamageSplash.Core
         public static bool TryMatch(Vector3 pos, out HitInfo info)
         {
             info = _current;
-            if (!_current.Valid)
+            if (!IsLive())
+            {
+                info = default(HitInfo);
                 return false;
+            }
             if ((pos - _current.Pos).sqrMagnitude > MatchDistanceSq)
             {
                 if (PluginConfig.Verbose.Value)
@@ -94,9 +102,18 @@ namespace DamageSplash.Core
         /// </summary>
         public static void SetSpawned(Vector3 pos, Splash splash)
         {
-            if (!_current.Valid || (pos - _current.Pos).sqrMagnitude > MatchDistanceSq)
+            if (!IsLive() || (pos - _current.Pos).sqrMagnitude > MatchDistanceSq)
                 return;
             _current.Spawned = splash;
+        }
+
+        /// <summary>
+        /// The whole chain runs on one stack in one frame, so a context from an earlier frame is
+        /// one whose hit never cleaned up after itself, and it must not tag anything.
+        /// </summary>
+        private static bool IsLive()
+        {
+            return _current.Valid && _current.Frame == Time.frameCount;
         }
     }
 }

@@ -133,6 +133,8 @@ namespace DamageSplash.Core
             splash.Color = PluginConfig.KillColor.Value;
             splash.Text.color = splash.Color;
             splash.Duration *= PluginConfig.KillDurationScale.Value;
+            // A killing blow is the end of that running total: nothing more adds into it.
+            splash.MergeKey = 0;
         }
 
         private static string Decorate(string number, string tag)
