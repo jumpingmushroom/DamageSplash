@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text;
 using TMPro;
 
@@ -21,10 +22,10 @@ namespace DamageSplash.Core
                     string sub = args.Length > 1 ? args[1].ToLowerInvariant() : "help";
                     switch (sub)
                     {
-                        case "demo": Say(args.Context, "DamageSplash: " + Demo.Start(args.Length > 2 && float.TryParse(args[2], out float hold) ? hold : 0f)); break;
-                        case "burst": Say(args.Context, "DamageSplash: " + Demo.Burst(args.Length > 2 && int.TryParse(args[2], out int n) ? n : 40)); break;
-                        case "rain": Say(args.Context, "DamageSplash: " + Demo.Rain(args.Length > 2 && float.TryParse(args[2], out float secs) ? secs : 30f)); break;
-                        case "dot": Say(args.Context, "DamageSplash: " + Demo.Dot(args.Length > 2 && float.TryParse(args[2], out float dsecs) ? dsecs : 12f)); break;
+                        case "demo": Say(args.Context, "DamageSplash: " + Demo.Start(args.Length > 2 && float.TryParse(args[2], NumberStyles.Float, CultureInfo.InvariantCulture, out float hold) ? hold : 0f)); break;
+                        case "burst": Say(args.Context, "DamageSplash: " + Demo.Burst(args.Length > 2 && int.TryParse(args[2], NumberStyles.Integer, CultureInfo.InvariantCulture, out int n) ? n : 40)); break;
+                        case "rain": Say(args.Context, "DamageSplash: " + Demo.Rain(args.Length > 2 && float.TryParse(args[2], NumberStyles.Float, CultureInfo.InvariantCulture, out float secs) ? secs : 30f)); break;
+                        case "dot": Say(args.Context, "DamageSplash: " + Demo.Dot(args.Length > 2 && float.TryParse(args[2], NumberStyles.Float, CultureInfo.InvariantCulture, out float dsecs) ? dsecs : 12f)); break;
                         case "stop": Demo.Stop(); Say(args.Context, "DamageSplash: stopped"); break;
                         case "set": Set(args); break;
                         case "get": Get(args); break;

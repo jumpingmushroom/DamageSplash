@@ -1,7 +1,9 @@
 using BepInEx;
 using BepInEx.Logging;
 using DamageSplash.Core;
+using DamageSplash.Patches;
 using HarmonyLib;
+using System;
 using System.IO;
 using UnityEngine;
 
@@ -14,7 +16,7 @@ namespace DamageSplash
     {
         public const string PluginGuid = "com.jumpingmushroom.damagesplash";
         public const string PluginName = "DamageSplash";
-        public const string PluginVersion = "0.1.1";
+        public const string PluginVersion = "0.1.2";
 
         internal static ManualLogSource Log;
 
@@ -39,6 +41,7 @@ namespace DamageSplash
         private void OnDestroy()
         {
             PluginConfig.Changed -= OnConfigChanged;
+            DamageTextPatches.ApplyMaxDistance(unloading: true);
             EdgeFlash.Destroy();
             SplashPool.Clear();
             if (_harmony != null)
@@ -77,7 +80,13 @@ namespace DamageSplash
                 lines = File.ReadAllLines(path);
                 File.Delete(path);
             }
-            catch (IOException) { return; }
+            catch (Exception ex)
+            {
+                // Locked by the writer, or no permission: try again on the next poll.
+                if (PluginConfig.Verbose.Value)
+                    Log.LogDebug("command file not read: " + ex.Message);
+                return;
+            }
 
             Terminal console = Console.instance;
             foreach (string raw in lines)
@@ -86,19 +95,21 @@ namespace DamageSplash
                 if (line.Length == 0 || line.StartsWith("#"))
                     continue;
                 Log.LogInfo("command file: " + line);
-                console.TryRunCommand(line, silentFail: false, skipAllowedCheck: true);
+                // The game's own checks stay on: a file anyone can write must not run cheats
+                // that devcommands has not unlocked. The splash commands need no unlocking.
+                console.TryRunCommand(line, silentFail: false, skipAllowedCheck: false);
             }
         }
 
-        /// <summary>Any visual setting changed: drop cached styles and materials, push the
-        /// distance cap into the live DamageText.</summary>
+        /// <summary>Any setting changed: rebuild cached materials and hand them to the numbers
+        /// already in flight, and push the distance cap into the live DamageText.</summary>
         private static void OnConfigChanged()
         {
             Styles.Invalidate();
+            SplashPool.Rematerial();
             EdgeFlash.Invalidate();
             Compat.Detect();
-            if (DamageText.instance != null)
-                DamageText.instance.m_maxTextDistance = PluginConfig.MaxDistance.Value;
+            DamageTextPatches.ApplyMaxDistance();
         }
     }
 }

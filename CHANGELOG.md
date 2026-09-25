@@ -1,6 +1,32 @@
 # Changelog
 
-## 0.1.1 (unreleased)
+## 0.1.2
+
+- **Mine** visibility now keeps your own hits on creatures another player's game is running.
+  Those numbers arrive with no hit behind them, and were being dropped as someone else's; they
+  are now recognised by where your hit landed.
+- Changing a setting no longer breaks the numbers already on screen: they switch to the new
+  outline and shadow instead of drawing with a discarded material. The compatibility check
+  also stops writing a log line on every change (every frame while a slider is dragged).
+- The Vanilla preset turns off tick merging and the screen-edge flash, which vanilla has
+  neither of; Bold and Festive set them to their defaults.
+- The distance limit is only applied while DamageSplash is drawing. Disabled, or standing aside
+  for another damage-number mod, vanilla's own 30 m is back.
+- `splash reload` applies a preset changed in the config file, as choosing it in the dropdown
+  would.
+- Only the first hit in a sneak attack's frame is tagged SNEAK; a second hit landing in the
+  same frame no longer is.
+- The screen-edge flash measures the health a hit actually takes, after the world's
+  damage-taken setting, and no longer fires in god mode.
+- Bounce bounces once, as described, instead of hopping every time it drops back down.
+- Sneak and crit hits never merge into other numbers, even with their tag word blanked out.
+- A merged number keeps the transparency of its configured colour.
+- The screen-edge flash no longer leaks a texture on each world change.
+- The development command file no longer bypasses the game's check for cheat commands, and a
+  file it cannot read is retried rather than raising an error every half second.
+- `splash demo 2.5` and the other console numbers parse the same on every system locale.
+
+## 0.1.1
 
 - A failure inside DamageSplash can no longer cancel a hit. The number is drawn inside the
   game's damage call, before the health is taken, so an exception from the mod used to abort

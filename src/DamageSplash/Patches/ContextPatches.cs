@@ -51,10 +51,11 @@ namespace DamageSplash.Patches
             bool combat = hit.m_hitType == HitData.HitType.EnemyHit || hit.m_hitType == HitData.HitType.PlayerHit;
 
             bool wantsAttacker = PluginConfig.Visibility.Value != PluginConfig.VisibilityAll;
+            int targetId = target.GetInstanceID();
             var info = new HitInfo
             {
                 Pos = hit.m_point,
-                TargetId = target.GetInstanceID(),
+                TargetId = targetId,
                 TargetIsLocalPlayer = ReferenceEquals(target, Player.m_localPlayer),
                 // Resolving the attacker costs a scene lookup, so only when something asks.
                 AttackerIsLocal = wantsAttacker && ReferenceEquals(hit.GetAttacker(), Player.m_localPlayer),
@@ -68,8 +69,7 @@ namespace DamageSplash.Patches
                 // Only a hit on something still standing can be the killing blow.
                 WasAlive = target.GetHealth() > 0f,
                 Dot = dot,
-                // RPC_Damage stamps m_backstabTime in this same frame when a sneak attack lands.
-                Sneak = combat && target.m_backstabTime == Time.time,
+                Sneak = combat && IsSneak(target, targetId),
                 // RPC_Damage doubles the damage of a hit on a staggered creature. Restricted to
                 // real combat hits so a burning tick on a staggering troll is not called a crit.
                 StaggerCrit = combat && !target.IsPlayer() && target.IsStaggering(),
@@ -83,10 +83,34 @@ namespace DamageSplash.Patches
             HitContext.Set(info);
 
             if (info.TargetIsLocalPlayer && PluginConfig.EdgeFlash.Value && info.MaxHealth > 0f
-                && info.Damage / info.MaxHealth >= PluginConfig.EdgeFlashPercent.Value)
+                && !target.InGodMode() && !target.InGhostMode())
             {
-                EdgeFlash.Trigger();
+                // What the health bar loses: ApplyDamage scales a player's damage by the world's
+                // damage-taken setting after the number is shown, and skips hits under 0.1.
+                float taken = info.Damage * Game.m_localDamgeTakenRate;
+                if (taken > 0.1f && taken / info.MaxHealth >= PluginConfig.EdgeFlashPercent.Value)
+                    EdgeFlash.Trigger();
             }
+        }
+
+        private static int _sneakTarget;
+        private static float _sneakTime = -1f;
+
+        /// <summary>
+        /// RPC_Damage stamps m_backstabTime with this frame's time when a sneak attack lands.
+        /// Any other hit on the same target later in the frame sees the same stamp, though the
+        /// cooldown denied it the bonus, so only the first hit to see it gets the tag.
+        /// </summary>
+        private static bool IsSneak(Character target, int targetId)
+        {
+            float now = Time.time;
+            if (target.m_backstabTime != now)
+                return false;
+            if (_sneakTarget == targetId && _sneakTime == now)
+                return false;
+            _sneakTarget = targetId;
+            _sneakTime = now;
+            return true;
         }
 
         [HarmonyPostfix]

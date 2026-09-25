@@ -84,20 +84,24 @@ namespace DamageSplash.Core
 
             Tier tier = TierForValue(s.Value, s.MaxHealth);
             string tag = null;
+            bool flagged = false;
             if (hasHit && PluginConfig.SneakEnabled.Value && hit.Sneak)
             {
+                flagged = true;
                 tag = PluginConfig.SneakTag.Value;
                 s.Color = PluginConfig.SneakColor.Value;
                 tier = Bump(tier);
             }
             else if (hasHit && PluginConfig.CritEnabled.Value && hit.StaggerCrit)
             {
+                flagged = true;
                 tag = PluginConfig.CritTag.Value;
                 s.Color = PluginConfig.CritColor.Value;
                 tier = Bump(tier);
             }
 
-            s.Tagged = !string.IsNullOrEmpty(tag);
+            // A sneak or crit stands alone even with its tag word blanked out.
+            s.Tagged = flagged;
             s.Number = Format(type, text);
             s.Text = Decorate(s.Number, tag);
             s.SizeScale = ScaleFor(tier);
@@ -258,7 +262,7 @@ namespace DamageSplash.Core
         }
 
         /// <summary>Outline and shadow live on the material, so one clone per font.</summary>
-        private static Material MaterialFor(TMP_FontAsset font)
+        public static Material MaterialFor(TMP_FontAsset font)
         {
             float outline = PluginConfig.OutlineWidth.Value;
             float dilate = PluginConfig.FaceDilate.Value;

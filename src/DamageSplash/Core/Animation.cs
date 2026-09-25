@@ -18,6 +18,7 @@ namespace DamageSplash.Core
         public float ExitShrink;    // scale at the very end; 1 disables
         public bool Bounce;
         public float Jitter;        // spawn-point random offset, metres
+        public bool Bounced;        // per number: the one bounce has been spent
 
         public static AnimParams Vanilla => new AnimParams
         {
@@ -55,8 +56,9 @@ namespace DamageSplash.Core
             if (p.Gravity > 0f)
                 velocity.y -= p.Gravity * dt;
             offset += velocity * dt;
-            if (p.Bounce && offset.y < 0f && velocity.y < 0f)
+            if (p.Bounce && !p.Bounced && offset.y < 0f && velocity.y < 0f)
             {
+                p.Bounced = true;
                 offset.y = -offset.y * BounceRestitution;
                 velocity.y = -velocity.y * BounceRestitution;
                 velocity.x *= 0.6f;

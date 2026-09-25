@@ -57,11 +57,12 @@ namespace DamageSplash.Core
             s.Origin = worldPos;
             s.Offset = Vector3.zero;
             s.Velocity = Animation.InitialVelocity(ref s.Anim);
+            s.Anim.Bounced = false;
 
             // Start the life over: the number brightens, pops again and stays a while longer,
             // which is what makes a run of ticks read as one thing that is still happening.
+            // Resetting the timer is what brightens it; the configured colour keeps its alpha.
             s.Timer = 0f;
-            s.Color.a = 1f;
             s.Tr.localScale = Vector3.one * (s.Anim.PopDuration > 0f ? s.Anim.PopFrom : 1f);
             return s;
         }

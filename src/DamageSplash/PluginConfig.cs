@@ -297,6 +297,7 @@ namespace DamageSplash
                         FaceDilate.Value = 0f; OutlineWidth.Value = 0f; Shadow.Value = false;
                         ResetColors();
                         SetHitStyling(magnitude: false, tints: false, flags: false);
+                        SetExtras(false);
                         AnimPreset.Value = "Vanilla"; SetAnim(AnimPresetValues("Vanilla"));
                         break;
                     case "Bold":
@@ -305,6 +306,7 @@ namespace DamageSplash
                         FaceDilate.Value = 0.22f; OutlineWidth.Value = 0.15f; OutlineColor.Value = Color.black; Shadow.Value = true; ShadowOffset.Value = 0.3f;
                         ResetColors();
                         SetHitStyling(magnitude: true, tints: false, flags: true);
+                        SetExtras(true);
                         AnimPreset.Value = "Pop"; SetAnim(AnimPresetValues("Pop"));
                         break;
                     case "Festive":
@@ -313,6 +315,7 @@ namespace DamageSplash
                         FaceDilate.Value = 0.28f; OutlineWidth.Value = 0.18f; OutlineColor.Value = Color.black; Shadow.Value = true; ShadowOffset.Value = 0.3f;
                         ResetColors();
                         SetHitStyling(magnitude: true, tints: true, flags: true);
+                        SetExtras(true);
                         AnimPreset.Value = "Arc"; SetAnim(AnimPresetValues("Arc"));
                         break;
                     default:
@@ -387,6 +390,15 @@ namespace DamageSplash
             SneakEnabled.Value = flags;
             CritEnabled.Value = flags;
             KillEnabled.Value = flags;
+        }
+
+        /// <summary>Merging and the edge flash: vanilla has neither, the other presets both, at
+        /// the defaults. Set here so a preset describes all of what is on screen.</summary>
+        private static void SetExtras(bool on)
+        {
+            DotMergeWindow.Value = on ? 1.2f : 0f;
+            HitMergeWindow.Value = 0f;
+            EdgeFlash.Value = on;
         }
 
         private static void ResetColors()
@@ -486,10 +498,20 @@ namespace DamageSplash
         {
             if (_cfg == null)
                 return;
+            string preset = Preset.Value, anim = AnimPreset.Value;
             _applying = true;
             try { _cfg.Reload(); }
             finally { _applying = false; }
-            Raise();
+
+            // A preset edited in the file is a request to apply it, as picking it in the
+            // dropdown would be. Other edits made alongside it are kept only when the preset
+            // itself did not change.
+            if (Preset.Value != preset && Preset.Value != PresetCustom)
+                ApplyPreset(Preset.Value);
+            else if (AnimPreset.Value != anim && AnimPreset.Value != PresetCustom)
+                ApplyAnimPreset(AnimPreset.Value);
+            else
+                Raise();
         }
 
         public static AnimParams CurrentAnim()

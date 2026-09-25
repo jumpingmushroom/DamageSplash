@@ -15,10 +15,13 @@
   pipeline without uploading. **Never publish without being asked**: a Thunderstore version can
   never be replaced or deleted, and it needs `TS_TEAM` and `TCLI_AUTH_TOKEN` from the user.
 - `build/make_icon.py` rebuilds the icon by lifting the rendered "312" out of
-  `docs/images/m3-daylight.png` and upscaling the glyph mask. It needs that screenshot to exist.
+  `docs/images/icon-source.png` (a crop of a real screenshot) and upscaling the glyph mask. It
+  needs that crop to exist.
 
 ## Building and testing
 
+- `build/deploy.sh`, `logs.sh`, `shot.sh` and `crop.sh` are rig-specific and gitignored: they
+  exist only on the dev box, not in a fresh clone.
 - `./build/deploy.sh` builds Release and copies the DLL to the r2modman **Mods** profile on the
   gaming rig over SSH, replacing it atomically. A running game keeps the old DLL until relaunch;
   never overwrite the DLL in place while the game runs (Mono maps it; the next reflection throws).

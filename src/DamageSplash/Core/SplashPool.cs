@@ -119,7 +119,7 @@ namespace DamageSplash.Core
             TMP_FontAsset font = style.Font ?? PrefabFont;
             if (t.font != font)
                 t.font = font;                                  // also resets the shared material
-            Material mat = style.Material ?? (font == PrefabFont ? PrefabMaterial : font.material);
+            Material mat = MaterialFor(font, style.Material);
             if (t.fontSharedMaterial != mat)
                 t.fontSharedMaterial = mat;
             t.fontStyle = style.FauxBold ? FontStyles.Bold : FontStyles.Normal;
@@ -151,6 +151,32 @@ namespace DamageSplash.Core
             s.Go.SetActive(false);                              // positioned on the next update
             _active.Add(s);
             return s;
+        }
+
+        /// <summary>The styled material where there is one, else the font's own.</summary>
+        private static Material MaterialFor(TMP_FontAsset font, Material styled)
+        {
+            if (styled != null)
+                return styled;
+            return font == PrefabFont ? PrefabMaterial : font.material;
+        }
+
+        /// <summary>
+        /// The styled materials were just rebuilt and the old ones destroyed. Numbers still in
+        /// flight get the new ones, or they would draw with a dead material for the rest of
+        /// their life. Destroy is deferred to the end of the frame, so nothing draws in between.
+        /// </summary>
+        public static void Rematerial()
+        {
+            foreach (Splash s in _active)
+            {
+                if (s.Go == null || s.Text == null || s.Text.font == null)
+                    continue;
+                TMP_FontAsset font = s.Text.font;
+                Material mat = MaterialFor(font, Styles.MaterialFor(font));
+                if (s.Text.fontSharedMaterial != mat)
+                    s.Text.fontSharedMaterial = mat;
+            }
         }
 
         /// <summary>Vanilla's near/far sizes, but blended between two distances instead of

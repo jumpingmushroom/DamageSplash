@@ -23,7 +23,23 @@ namespace DamageSplash.Patches
             Styles.Invalidate();
             Compat.Detect();
             SplashPool.Init(__instance);
-            __instance.m_maxTextDistance = PluginConfig.MaxDistance.Value;
+            _vanillaMaxDistance = __instance.m_maxTextDistance;
+            ApplyMaxDistance();
+        }
+
+        private static float _vanillaMaxDistance = -1f;
+
+        /// <summary>
+        /// The distance cap lives in vanilla's RPC, so it is ours to set only while we draw.
+        /// Disabled, yielding to another mod, or unloading: vanilla gets its own value back.
+        /// </summary>
+        internal static void ApplyMaxDistance(bool unloading = false)
+        {
+            DamageText dt = DamageText.instance;
+            if (dt == null || _vanillaMaxDistance < 0f)
+                return;
+            bool ours = !unloading && PluginConfig.Enabled.Value && !Compat.ShouldYield;
+            dt.m_maxTextDistance = ours ? PluginConfig.MaxDistance.Value : _vanillaMaxDistance;
         }
 
         [HarmonyPrefix]
@@ -74,8 +90,9 @@ namespace DamageSplash.Patches
         /// <summary>
         /// Whose numbers to show. Only hits resolved on this machine can be told apart at all,
         /// so "Mine" keeps yours and anything aimed at you, and drops what arrives over the wire
-        /// from someone else's fight. Blocks, heals, bonuses and "too hard" are not damage
-        /// numbers and always show.
+        /// from someone else's fight. Your own hits on something another client owns arrive the
+        /// same way, and are recognised by where they land (OutgoingHits). Blocks, heals, bonuses
+        /// and "too hard" are not damage numbers and always show.
         /// </summary>
         private static bool Allowed(DamageText.TextType type, bool mySelf, Vector3 pos)
         {
@@ -91,7 +108,9 @@ namespace DamageSplash.Patches
                 return true;
 
             HitInfo hit;
-            return HitContext.TryMatch(pos, out hit) && (hit.AttackerIsLocal || hit.TargetIsLocalPlayer);
+            if (HitContext.TryMatch(pos, out hit))
+                return hit.AttackerIsLocal || hit.TargetIsLocalPlayer;
+            return OutgoingHits.Matches(pos);
         }
 
         [HarmonyPrefix]

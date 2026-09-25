@@ -3,7 +3,7 @@
   <PropertyGroup>
     <AssemblyName>DamageSplash</AssemblyName>
     <RootNamespace>DamageSplash</RootNamespace>
-    <Version>0.1.1</Version>
+    <Version>0.1.2</Version>
     <Description>Bigger, bolder, more festive floating damage numbers for Valheim.</Description>
   </PropertyGroup>
 

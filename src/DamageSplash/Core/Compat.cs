@@ -18,6 +18,14 @@ namespace DamageSplash.Core
 
         public static bool ShouldYield => Conflict != null && PluginConfig.YieldToOtherMods.Value;
 
+        private static bool _logged;
+        private static string _loggedConflict;
+        private static bool _loggedYield;
+
+        /// <summary>
+        /// Runs on every setting change, which is every frame while a slider is dragged, so
+        /// the verdict is logged only when it differs from the last one logged.
+        /// </summary>
         public static void Detect()
         {
             Conflict = null;
@@ -39,6 +47,12 @@ namespace DamageSplash.Core
                     }
                 }
             }
+
+            if (_logged && _loggedConflict == Conflict && _loggedYield == ShouldYield)
+                return;
+            _logged = true;
+            _loggedConflict = Conflict;
+            _loggedYield = ShouldYield;
 
             if (Conflict == null)
                 DamageSplashPlugin.Log.LogInfo("no other damage-number mod found.");

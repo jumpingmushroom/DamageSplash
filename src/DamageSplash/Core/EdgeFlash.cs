@@ -89,6 +89,9 @@ namespace DamageSplash.Core
 
             _image = go.GetComponent<Image>();
             _image.raycastTarget = false;
+            // The previous overlay died with its canvas (a world change), but its sprite and
+            // texture are not scene objects and would outlive it.
+            DestroyTexture();
             _image.sprite = BuildSprite();
             _image.type = Image.Type.Simple;
             go.SetActive(false);

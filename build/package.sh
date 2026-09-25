@@ -27,8 +27,10 @@ dotnet build "$PROJ" -c Release --nologo -v minimal
 VERSION=$(python3 -c "import json;print(json.load(open('$ROOT/thunderstore/manifest.json'))['version_number'])")
 ASM_VERSION=$(grep -oP '(?<=PluginVersion = ")[^"]+' "$ROOT/src/DamageSplash/Plugin.cs")
 
-if [ "$VERSION" != "$ASM_VERSION" ]; then
-    echo "version mismatch: manifest.json says $VERSION, Plugin.cs says $ASM_VERSION" >&2
+CSPROJ_VERSION=$(grep -oP '(?<=<Version>)[^<]+' "$PROJ")
+
+if [ "$VERSION" != "$ASM_VERSION" ] || [ "$VERSION" != "$CSPROJ_VERSION" ]; then
+    echo "version mismatch: manifest.json says $VERSION, Plugin.cs says $ASM_VERSION, csproj says $CSPROJ_VERSION" >&2
     exit 1
 fi
 
